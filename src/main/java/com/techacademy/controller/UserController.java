@@ -45,14 +45,24 @@ public class UserController {
         return "redirect:/user/list";
     }
 
-    @GetMapping("/update/{id}/")
-    public String getUser(@PathVariable("id") Integer id, Model model) {
-        model.addAttribute("user", service.getUser(id));
-        return "user/update";
+    @GetMapping(value={"/update", "/update/{id}/"})
+    public String getUser(@ModelAttribute User user, @PathVariable("id") Integer id, Model model) {
+        if (id != null) {
+            service.getUser(id);
+            User kousinuser = service.getUser(id);
+            model.addAttribute("user", kousinuser);
+            return "user/update";
+        }
+        model.addAttribute(user);
+        return "/user/update";
     }
 
     @PostMapping("update/{id}/")
-    public String postUser(User user) {
+    public String postUser(@Validated User user, BindingResult res, Model model) {
+        if(res.hasErrors()) {
+            model.addAttribute("id", null);
+            return getUser(user, null, model);
+        }
         service.saveUser(user);
         return "redirect:/user/list";
     }
